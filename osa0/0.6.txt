@@ -1,0 +1,6 @@
+selain->palvelin: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
+palvelin-->selain: JSON
+
+note over selain:
+Selain ajaa JS:ää ja tulkitsee että muistio on lisätty ja renderöi tämän listaan
+end note
