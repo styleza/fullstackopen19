@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import './index.css'
 
 const Filter = props => (
     <p>
@@ -32,17 +33,31 @@ const PersonForm = props => {
     )
 }
 
+const PersonDeleteHandler = (cb, person) => {
+    if(window.confirm(`Haluatko varmasti poistaa ${person.name}?`)){
+        cb(person)
+    }
+}
+
+const Person = props => (
+    <li key={props.person.name}>
+        {props.person.name}: {props.person.number}
+        <button onClick={() => PersonDeleteHandler(props.deletePerson, props.person)}>Poista</button>
+    </li>
+)
 
 const Persons = props => (
     <ul>
         {props.persons.map(person =>
             person.name.toLowerCase().indexOf(props.filter) !== -1 ?
-                <li key={person.name}>
-                    {person.name}: {person.number}
-                </li>
+                <Person key={person.id} person={person} deletePerson={props.deletePerson} />
                 : null)}
     </ul>
 )
 
+const FlashMessenger = props => (
+    <p className={`flash-message-${props.message.type}`}>{props.message.message}</p>
+)
 
-export {Filter, PersonForm, Persons}
+
+export {Filter, PersonForm, Persons, FlashMessenger}
