@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.css"],"names":[],"mappings":"AAAA,kBACE,iBAAkB,CAClB,sBACF,CAEA,sBACE,iBAAkB,CAClB,oBACF","file":"main.42554eb1.chunk.css","sourcesContent":[".flash-message-ok {\n  border-radius: 5px;\n  border: 3px solid green;\n}\n\n.flash-message-notice {\n  border-radius: 5px;\n  border: 3px solid red;\n}"]}
