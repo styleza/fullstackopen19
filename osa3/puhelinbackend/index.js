@@ -3,26 +3,9 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const app = express()
+const Person = require('./models/person')
 
 const PORT = process.env.PORT ||3001
-
-let data = [
-    {
-        "name": "Arto Hellas",
-        "number": "040-123456",
-        "id": 1
-    },
-    {
-        "name": "Martti Tienari",
-        "number": "040-123456",
-        "id": 2
-    },
-    {
-        "name": "Arto Järvinen",
-        "number": "040-123456",
-        "id": 3
-    }
-]
 
 morgan.token('body', (req, res) => JSON.stringify(req.body))
 
@@ -30,26 +13,32 @@ const entityValidator = (entity) => {
     if(!('name' in entity && 'number' in entity)){
         return [false, 'Missing required parameters']
     }
-    if(data.find(i => i.name === entity.name)){
+/*    if(data.find(i => i.name === entity.name)){
         return [false, 'name must be unique']
-    }
+    }*/
     return [true, '']
 }
 
 const apiRouter = express.Router()
 apiRouter.route('/persons')
-
     .get((req,res) => {
-        res.status(200).json(data)
+        Person.find({}, (err, persons) => {
+            if(err){
+                res.status(500).end()
+            } else {
+                res.status(200).json(persons)
+            }
+        })
     })
     .post((req,res) => {
-        let entity = req.body
-        entity['id'] = Math.round(Math.random()*100000)
-
+        const entity = req.body
         const [isValid,error] = entityValidator(entity)
+
         if(isValid){
-            data = data.concat(entity)
-            res.status(200).json(entity)
+            const person = new Person(entity)
+            person.save().then(response => {
+                res.status(200).json(response)
+            })
         } else {
             res.status(400).json({error})
         }
@@ -57,22 +46,35 @@ apiRouter.route('/persons')
 
 apiRouter.route('/persons/:personId')
     .get((req,res) => {
-    console.log(req.params.personId)
-        const person = data.find(i => i.id == req.params.personId)
-        if(person){
-            res.status(200).json(person)
-        } else {
-            res.status(404).end()
-        }
+        Person.findById(req.params.personId)
+            .exec((err,person) => {
+                if(err || !person) {
+                    res.status(404).end()
+                }  else {
+                    res.status(200).json(person.toJSON())
+                }
+        })
     })
     .delete((req,res) => {
-        const lenBeforeFilter = data.length
-        data = data.filter(i => i.id != req.params.personId)
-        if(lenBeforeFilter > data.length){
-            res.status(200).end()
-        } else {
-            res.status(404).end()
-        }
+        Person.findByIdAndRemove(req.params.personId)
+            .exec((err, person) => {
+                if(err || !person){
+                    res.status(404).end()
+                } else {
+                    res.status(200).end()
+                }
+            })
+    })
+    .put((req,res) => {
+        const [isValid,error] = entityValidator(req.body)
+        Person.findByIdAndUpdate(req.params.personId, req.body)
+            .exec((err, person) => {
+                if(err || !person){
+                    res.status(404).end()
+                } else {
+                    res.status(200).end()
+                }
+            })
     })
 
 app.use(bodyParser.json())
@@ -82,8 +84,15 @@ app.use('/api',apiRouter)
 
 
 app.get('/info', (req, res) => {
-    res.status(200)
-        .send(`Puhelinluettelossa ${data.length} henkilön tiedot <br/> ${(new Date())}`)
+    Person.find({}, (err, persons) => {
+        if(!err) {
+            res.status(200)
+                .send(`Puhelinluettelossa ${persons.length} henkilön tiedot <br/> ${(new Date())}`)
+        } else {
+            res.status(500).end()
+        }
+    })
+
 })
 
 app.listen(PORT, () => {
