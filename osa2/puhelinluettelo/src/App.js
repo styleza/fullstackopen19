@@ -22,6 +22,9 @@ const App = () => {
                   setPersons(persons.concat(r))
                   createMessage(`Lisättiin ${r.name}`,'ok')
               })
+              .catch(err => {
+                  createMessage(err.response.data.error)
+              })
       }
     }
 
