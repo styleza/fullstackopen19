@@ -66,7 +66,6 @@ apiRouter.route('/persons/:personId')
 
 const errorHandler = (error, req, res, next) => {
     console.error(error.message)
-    console.log("PYLLY")
 
     if (error.name === 'CastError' && error.kind == 'ObjectId') {
         return res.status(400).send({ error: 'malformatted id' })
